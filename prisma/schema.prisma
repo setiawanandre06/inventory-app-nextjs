@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  STAFF
+  VIEWER
+}
+
+enum MovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      String    @default("STAFF")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  movements StockMovement[]  // one to many
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  products  Product[]  // one to many
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  sku         String    @unique
+  name        String    
+  description String?
+  price       Decimal   @db.Decimal(12, 2)
+  stock       Int       @default(0)
+  minStock    Int       @default(0)
+  categoryId  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  category  Category        @relation(fields: [categoryId], references: [id])  // foreign key to Category : categoryId -> id (Category)
+  movements StockMovement[]  // one to many
+}
+
+model StockMovement {
+  id        String       @id @default(cuid())
+  type      MovementType
+  quantity  Int
+  note      String?
+  productId String
+  userId    String
+  createdAt DateTime     @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+}
