@@ -19,7 +19,7 @@ async function main() {
     console.log('Seeding database...');
 
     // Seed users
-    const superAdmin = await prisma.user.upsert({
+    await prisma.user.upsert({
         where: { email: 'superadmin@inventory.dev' },
         update: {},
         create: {
@@ -30,7 +30,7 @@ async function main() {
         },
     });
 
-    const admin = await prisma.user.upsert({
+    await prisma.user.upsert({
         where: { email: 'admin@inventory.dev' },
         update: {},
         create: {
@@ -41,7 +41,7 @@ async function main() {
         },
     });
 
-    const staff = await prisma.user.upsert({
+    await prisma.user.upsert({
         where: { email: 'staff@inventory.dev' },
         update: {},
         create: {
@@ -72,7 +72,7 @@ async function main() {
     ]);
 
     // Seed products
-    const products = await Promise.all([
+    await Promise.all([
         prisma.product.upsert({
             where: { sku: "ELEC-001" },
             update: {},
