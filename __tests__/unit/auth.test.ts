@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { signIn } from "next-auth/react";
 import bcrypt from "bcryptjs";
 import { authOptions, authorizeUser } from "../../lib/auth";
@@ -19,7 +19,7 @@ vi.mock("../../lib/prisma", () => ({
     },
 }));
 
-jest.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/prisma", () => ({
     prisma: {
         user: {
             findUnique: vi.fn(),

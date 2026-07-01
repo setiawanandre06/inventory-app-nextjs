@@ -37,7 +37,7 @@ export async function authorizeUser(credentials: {
     password: string;
 } | undefined) {
     // check if email and password are provided
-    if (!credentials?.email || credentials?.password) {
+    if (!credentials?.email || !credentials?.password) {
         return null;
     }
 
