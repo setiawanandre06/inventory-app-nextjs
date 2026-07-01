@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import { signIn } from "next-auth/react";
 import bcrypt from "bcryptjs";
 import { authOptions, authorizeUser } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";

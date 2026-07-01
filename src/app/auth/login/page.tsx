@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
-import LoginCard from "@/components/auth/LoginCard";
 import AltLoginCard from "@/components/auth/AltLoginCard";
 
 export default function LoginPage() {
@@ -47,16 +46,6 @@ export default function LoginPage() {
     }
 
     return (
-        // <LoginCard
-        //     email={email}
-        //     password={password}
-        //     error={error}
-        //     loading={loading}
-        //     onSubmit={handleSubmit}
-        //     onEmailChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
-        //     onPasswordChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
-        // />
-
         <AltLoginCard
             email={email}
             password={password}
