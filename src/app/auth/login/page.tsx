@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
+import AltLoginCard from "@/components/auth/AltLoginCard";
+
 export default function LoginPage() {
     const router = useRouter();
 
@@ -15,7 +17,7 @@ export default function LoginPage() {
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         // prevent the default form submission behavior
         // specifically, we want to prevent the page from reloading when the form is submitted
-        try{
+        try {
             event.preventDefault();
 
             setLoading(true);
@@ -31,7 +33,9 @@ export default function LoginPage() {
                 setError("Invalid email or password");
                 return;
             } else {
-                router.push("/");
+                console.log("Login success");
+                router.push("/dashboard");
+                router.refresh();
             }
         } catch (error) {
             setError("An unexpected error occurred. Please try again.");
@@ -41,11 +45,15 @@ export default function LoginPage() {
         }
     }
 
-    // draw the login form with email and password fields, and a submit button
     return (
-        // TODO : Implement login form with email and password fields, and a submit button
-        <h1 className="text-3xl font-bold underline">
-            Login
-        </h1>
+        <AltLoginCard
+            email={email}
+            password={password}
+            error={error}
+            loading={loading}
+            onSubmit={handleSubmit}
+            onEmailChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+            onPasswordChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+        />
     );
 }

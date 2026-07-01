@@ -10,6 +10,8 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env.DATABASE_URL || "mysql://root:password@localhost:3306/db",
+    url: process.env.DATABASE_URL ?? (() => {
+      throw new Error("DATABASE_URL must be set");
+    })(),
   },
 });
