@@ -2,7 +2,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { signIn } from "next-auth/react";
 import bcrypt from "bcryptjs";
-import { authOptions } from "../../lib/auth";
+import { authOptions, authorizeUser } from "../../lib/auth";
+import { prisma } from "../../lib/prisma";
 
 // Vitest Docs : https://vitest.dev/guide/
 
@@ -18,49 +19,87 @@ vi.mock("../../lib/prisma", () => ({
     },
 }));
 
+jest.mock("@/lib/prisma", () => ({
+    prisma: {
+        user: {
+            findUnique: vi.fn(),
+        },
+    },
+}));
+
 describe("Authentication", () => {
     // Test cases for authentication logic
     // it = alias for test
 
-    it("should authenticate a user with valid credentials", async () => {
-        // we need to input email and password, 
-        // then check if the user is authenticated successfully
-        const email = "staff@inventory.dev";
-        const password = "password"; // The password we seeded for the staff user
+    // setup for the test
+    const plainPassword = "password";
+    let hashedPassword: string;
 
-        // we use signIn from next-auth/react to simulate the sign-in process
-        // Note: In a real test, you would mock the signIn function and check its behavior
-        // For this example, we will just check if the signIn function is called with the correct parameters
-        await signIn("credentials", {
-            email,
-            password,
-            redirect: false,
+    beforeAll(async () => {
+        hashedPassword = await bcrypt.hash(plainPassword, 10);
+    });
+
+    it("should authenticate a user with valid credentials", async () => {
+        (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+            id: "1",
+            name: "Staff User",
+            email: "staff@inventory.dev",
+            password: hashedPassword,
+            role: "STAFF",
         });
 
-        expect(signIn).toHaveBeenCalledWith("credentials", { 
-            email, 
-            password, 
-            redirect: false 
+        const result = await authorizeUser({
+            email: "staff@inventory.dev",
+            password: plainPassword,
+        });
+
+        // assert that user is not null
+        expect(result).not.toBeNull();
+        // ensure value of result is same as the user object in the database
+        expect(result).toEqual({
+            id: "1",
+            name: "Staff User",
+            email: "staff@inventory.dev",
+            role: "STAFF",
         });
     });
 
     it("should not authenticate a user with invalid credentials", async () => {
-        // we need to input email and password, 
-        // then check if the user is not authenticated
-        const email = "staff@inventory.dev";
-        const password = "wrongpassword";
-
-        await signIn("credentials", {
-            email,
-            password,
-            redirect: false,
+        (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+            id: "1",
+            name: "Staff User",
+            email: "staff@inventory.dev",
+            password: hashedPassword,
+            role: "STAFF",
         });
 
-        expect(signIn).toHaveBeenCalledWith("credentials", {
-            email,
-            password,
-            redirect: false,
+        // this will fail because we use wrong password instead of correct hashed password
+        const result = await authorizeUser({
+            email: "staff@inventory.dev",
+            password: "wrongpassword",
         });
+
+        expect(result).toBeNull();
+    });
+
+    it("should not authenticate a user with non-existent email", async () => {
+        (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+
+        const result = await authorizeUser({
+            email: "nonexistent@inventory.dev",
+            password: plainPassword,
+        });
+
+        expect(result).toBeNull();
+    });
+
+    it("should not authenticate a user with missing credentials", async () => {
+        const result = await authorizeUser({
+            email: "",
+            password: "",
+        });
+
+        expect(result).toBeNull();
     });
 });
 
